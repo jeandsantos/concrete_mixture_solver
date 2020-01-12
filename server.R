@@ -1,12 +1,12 @@
-
+# Load required packages
 if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
+if(!require(plotly)) {install.packages("plotly")} else {require(plotly)}
 if(!require(GA)) {install.packages("GA")} else {require(GA)}
 if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
-# if(!require(DT)) {install.packages("DT")} else {require(DT)}
 if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
-if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
+# if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
 
 # Create vectors for variable names and ID
 features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
@@ -21,9 +21,8 @@ if(!exists("concrete_data")) {concrete_data <- readr::read_csv("concrete_data_pr
 if(!exists("model_strength")) {model_strength <- base::readRDS("Models/avNNet_model.rds")}
 
 # Import Functions
-if(!exists("eval_function")) {eval_function <- base::source("StrengthFinder_app/helpers/eval_function.R")}
 if(!exists("eval_function_with_limits")) {eval_function_with_limits <- base::source("StrengthFinder_app/helpers/eval_function_with_limits.R")}
-if(!exists("loss_function")) {loss_function <- base::source("StrengthFinder_app/helpers/loss_function.R")}
+if(!exists("GA_summary_plot")) {GA_summary_plot <- base::source("StrengthFinder_app/helpers/GA_summary_plot.R")}
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -66,6 +65,7 @@ shinyServer(function(input, output, session) {
         GA::ga(type = "real-valued",
                fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 
                                                                  min_limits_GA = min_limits_GA(), max_limits_GA = max_limits_GA()) },
+               names = c("Cement", "Ash", "Coarse Aggregate", "Fine Aggregate", "Slag", "Superplasticizer"),
                lower = c(min_limits_GA()$Cement, min_limits_GA()$Ash, min_limits_GA()$Coarse_Aggregate, min_limits_GA()$Fine_Aggregate, min_limits_GA()$Slag, min_limits_GA()$Superplasticizer), 
                upper = c(max_limits_GA()$Cement, max_limits_GA()$Ash, max_limits_GA()$Coarse_Aggregate, max_limits_GA()$Fine_Aggregate, max_limits_GA()$Slag, max_limits_GA()$Superplasticizer),
                popSize = input$pop_size, 
@@ -80,52 +80,81 @@ shinyServer(function(input, output, session) {
         
         })
     
-    output$GA_solution <- renderTable({
+    GA_solution_table <- eventReactive(eventExpr = input$run_GA, {
         
         tibble(
-             Cement = GA_output()@solution[1, 1]*100,
-             Ash = GA_output()@solution[1, 2]*100,
-             Coarse_Aggregate = GA_output()@solution[1, 3]*100,
-             Fine_Aggregate = GA_output()@solution[1, 4]*100,
-             Slag = GA_output()@solution[1, 5]*100,
-             Superplasticizer = GA_output()@solution[1, 6]*100,
-             Water = (1 - sum(GA_output()@solution[1,]))*100,
-             Age = age_selected,
-             Strength = GA_output()@fitnessValue,
-             , .name_repair = ~ c("Cement (%)", 
-                                  "Ash (%)", 
-                                  "Coarse Aggregate (%)", 
-                                  "Fine Aggregate (%)", 
-                                  "Slag (%)", 
-                                  "Superplasticizer (%)", 
-                                  "Water (%)", 
-                                  "Age (days)", 
-                                  "Compressive Strength (MPa)")
-        )
-        
-    })
+            Cement = GA_output()@solution[1, 1]*100,
+            Ash = GA_output()@solution[1, 2]*100,
+            Coarse_Aggregate = GA_output()@solution[1, 3]*100,
+            Fine_Aggregate = GA_output()@solution[1, 4]*100,
+            Slag = GA_output()@solution[1, 5]*100,
+            Superplasticizer = GA_output()@solution[1, 6]*100,
+            Water = (1 - sum(GA_output()@solution[1,]))*100,
+            Age = age_selected,
+            Strength = GA_output()@fitnessValue,
+            , .name_repair = ~ c("Cement (%)", 
+                                 "Ash (%)", 
+                                 "Coarse Aggregate (%)", 
+                                 "Fine Aggregate (%)", 
+                                 "Slag (%)", 
+                                 "Superplasticizer (%)", 
+                                 "Water (%)", 
+                                 "Age (days)", 
+                                 "Strength (MPa)")
+            )
+        })
+    
+    
+    output$GA_solution <- renderTable({ GA_solution_table() })
     
     output$GA_output_print <- renderPrint({ 
         
         if (GA_output()@fitnessValue > 0) {
             
-            print(paste("Genetic Algorithm successfully found a feasible solution"))
+            (paste0("Genetic Algorithm successfully found a feasible solution after ", GA_output()@iter, " iterations. ", 
+                         "Final fitness value: ", round(GA_output()@fitnessValue, 3)))
             
-        } else {
-            
-            print(paste("Genetic Algorithm did not find a feasible solution"))
-            
-        }
+        } else { paste("Genetic Algorithm did not find a feasible solution") }
         
         })
     
-    output$GA_plot <- renderPlot({
-
-        if(input$run_GA >= 1) {
-
-            plot(GA_output())
-
-        } # else {}
-    })
+    output$GA_plot <- renderPlotly({
+        
+        if(input$run_GA >= 1) { 
+            
+            print(
+                ggplotly( GA_summary_plot(GA_output()) )
+            )
+            } # else {}
+        })
+    
+    output$downloadData <- downloadHandler(
+        filename = function() {
+            paste("GA_solution_", gsub(pattern = "-|:| ", replacement = "_", Sys.time()), ".csv", sep = "")
+        },
+        content = function(file) {
+            write.csv(GA_solution_table(), file, row.names = FALSE)
+        }
+    )
+    
     
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
