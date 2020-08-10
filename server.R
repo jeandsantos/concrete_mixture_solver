@@ -27,50 +27,36 @@ message(Sys.time(),": Supporting functions imported")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
-
-    min_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { # 
-        
-        tibble(
-           Cement = input$Cement_range[1]/100,
-           Ash = input$Ash_range[1]/100,
-           Coarse_Aggregate = input$Coarse_Aggregate_range[1]/100,
-           Fine_Aggregate = input$Fine_Aggregate_range[1]/100,
-           Slag = input$Slag_range[1]/100,
-           Superplasticizer = input$Superplasticizer_range[1]/100,
-           Water = input$Water_range[1]/100
-           )
-    })
     
-    max_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = {
+    range_table <- function(idx, div=100){
         
         tibble(
-            Cement = input$Cement_range[2]/100,
-            Ash = input$Ash_range[2]/100,
-            Coarse_Aggregate = input$Coarse_Aggregate_range[2]/100,
-            Fine_Aggregate = input$Fine_Aggregate_range[2]/100,
-            Slag = input$Slag_range[2]/100,
-            Superplasticizer = input$Superplasticizer_range[2]/100,
-            Water = input$Water_range[2]/100
+            Cement = input$Cement_range[idx]/div,
+            Ash = input$Ash_range[idx]/div,
+            Coarse_Aggregate = input$Coarse_Aggregate_range[idx]/div,
+            Fine_Aggregate = input$Fine_Aggregate_range[idx]/div,
+            Slag = input$Slag_range[idx]/div,
+            Superplasticizer = input$Superplasticizer_range[idx]/div,
+            Water = input$Water_range[idx]/div
         )
-    })
+    }
     
-    # output$min_limits_GA_table <- renderTable({
-    #     
-    #     rbind(min_limits_GA(),
-    #           min_limits_GA())
-    #     
-    # })
-
+    min_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { range_table(idx = 1) })
+    max_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { range_table(idx = 2) })
+    
     GA_output <- eventReactive(eventExpr = input$run_GA, {
-        
-        # model_strength <- base::readRDS("models/avNNet_model.rds")
         
         GA::ga(type = "real-valued",
                fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 
-                                                                 min_limits_GA = min_limits_GA(), max_limits_GA = max_limits_GA()) },
+                                                                 min_limits_GA = min_limits_GA(), 
+                                                                 max_limits_GA = max_limits_GA()) },
                names = c("Cement", "Ash", "Coarse Aggregate", "Fine Aggregate", "Slag", "Superplasticizer"),
-               lower = c(min_limits_GA()$Cement, min_limits_GA()$Ash, min_limits_GA()$Coarse_Aggregate, min_limits_GA()$Fine_Aggregate, min_limits_GA()$Slag, min_limits_GA()$Superplasticizer), 
-               upper = c(max_limits_GA()$Cement, max_limits_GA()$Ash, max_limits_GA()$Coarse_Aggregate, max_limits_GA()$Fine_Aggregate, max_limits_GA()$Slag, max_limits_GA()$Superplasticizer),
+               lower = c(min_limits_GA()$Cement, min_limits_GA()$Ash, 
+                         min_limits_GA()$Coarse_Aggregate, min_limits_GA()$Fine_Aggregate, 
+                         min_limits_GA()$Slag, min_limits_GA()$Superplasticizer), 
+               upper = c(max_limits_GA()$Cement, max_limits_GA()$Ash, 
+                         max_limits_GA()$Coarse_Aggregate, max_limits_GA()$Fine_Aggregate, 
+                         max_limits_GA()$Slag, max_limits_GA()$Superplasticizer),
                popSize = input$pop_size, 
                maxiter = input$max_iter, 
                optim = input$local_search, 
@@ -80,22 +66,21 @@ shinyServer(function(input, output, session) {
                updatePop = FALSE,
                monitor = FALSE
                )
-        
         })
     
     GA_solution_table <- eventReactive(eventExpr = input$run_GA, {
         
         tibble(
-            Cement = GA_output()@solution[1, 1]*100,
-            Ash = GA_output()@solution[1, 2]*100,
-            Coarse_Aggregate = GA_output()@solution[1, 3]*100,
-            Fine_Aggregate = GA_output()@solution[1, 4]*100,
-            Slag = GA_output()@solution[1, 5]*100,
-            Superplasticizer = GA_output()@solution[1, 6]*100,
+            Cement = GA_output()@solution[1, "Cement"]*100,
+            Ash = GA_output()@solution[1, "Ash"]*100,
+            Coarse_Aggregate = GA_output()@solution[1, "Coarse_Aggregate"]*100,
+            Fine_Aggregate = GA_output()@solution[1, "Fine_Aggregate"]*100,
+            Slag = GA_output()@solution[1, "Slag"]*100,
+            Superplasticizer = GA_output()@solution[1, "Superplasticizer"]*100,
             Water = (1 - sum(GA_output()@solution[1,]))*100,
             Age = age_selected,
             Strength = GA_output()@fitnessValue,
-            , .name_repair = ~ c("Cement (%)", 
+            .name_repair = ~ c("Cement (%)", 
                                  "Ash (%)", 
                                  "Coarse Aggregate (%)", 
                                  "Fine Aggregate (%)", 
@@ -123,12 +108,7 @@ shinyServer(function(input, output, session) {
     
     output$GA_plot <- renderPlotly({
         
-        if(input$run_GA >= 1) { 
-            
-            print(
-                ggplotly( GA_summary_plot(GA_output()) )
-            )
-            } # else {}
+        if(input$run_GA >= 1) { print( ggplotly( GA_summary_plot(GA_output()) ) ) } 
         })
     
     output$downloadData <- downloadHandler(
