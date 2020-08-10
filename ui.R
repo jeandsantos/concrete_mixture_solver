@@ -5,6 +5,10 @@ if(!require(plotly)) {install.packages("plotly")} else {require(plotly)}
 # if(!require(ggthemes)) {install.packages("ggthemes")} else {require(ggthemes)}
 if(!require(shinycssloaders)) {install.packages("shinycssloaders")} else {require(shinycssloaders)}
 
+slider_ranges <- function(id, label, value, step=0.5, min = 0, max = 100, post="%") {
+  sliderInput(id, label = label, min = min, max = max, value = value, step = step, post = post)
+}
+
 # Define UI 
 shinyUI(
   navbarPage(title = "StrengthFinder",
@@ -13,20 +17,13 @@ shinyUI(
                       icon = icon("bullseye"),
                       sidebarLayout(
                         sidebarPanel(h4(strong("Component Ranges")),
-                                     sliderInput("Cement_range", "Cement", post = "%", 
-                                                 min = 0, max = 100, value = c(4, 25), step = 0.5),
-                                     sliderInput("Ash_range", "Ash",  post = "%",
-                                                 min = 0, max = 100, value = c(0, 10), step = 0.5), post = "%",
-                                     sliderInput("Coarse_Aggregate_range", "Coarse Aggregate",  post = "%",
-                                                 min = 0, max = 100, value = c(30, 55), step = 0.5),
-                                     sliderInput("Fine_Aggregate_range", "Fine Aggregate",  post = "%",
-                                                 min = 0, max = 100, value = c(20, 45), step = 0.5),
-                                     sliderInput("Slag_range", "Slag",  post = "%",
-                                                 min = 0, max = 100, value = c(0, 20), step = 0.5),
-                                     sliderInput("Superplasticizer_range", "Superplasticizer",  post = "%",
-                                                 min = 0, max = 3, value = c(0, 1), step = 0.05),
-                                     sliderInput("Water_range", "Water", post = "%",
-                                                 min = 5, max = 15, value = c(5, 12), step = 0.5),
+                                     slider_ranges("Cement_range", "Cement", value = c(4, 25)),
+                                     slider_ranges("Ash_range", "Ash", value = c(0, 10)), 
+                                     slider_ranges("Coarse_Aggregate_range", "Coarse Aggregate", value = c(30, 55)),
+                                     slider_ranges("Fine_Aggregate_range", "Fine Aggregate",  value = c(20, 45)),
+                                     slider_ranges("Slag_range", "Slag",  value = c(0, 20)),
+                                     slider_ranges("Superplasticizer_range", "Superplasticizer",  value = c(0, 1), step = 0.05, max = 3),
+                                     slider_ranges("Water_range", "Water", value = c(5, 12), max=15),
                                      actionButton("run_GA", "Run Solver", width = "170px", icon = icon("bullseye")), br(),br(),
                                      downloadButton("downloadData", "Download Results"),
                                      width = 3

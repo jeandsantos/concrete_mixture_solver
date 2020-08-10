@@ -30,7 +30,7 @@ shinyServer(function(input, output, session) {
 
     min_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { # 
         
-        data_frame(
+        tibble(
            Cement = input$Cement_range[1]/100,
            Ash = input$Ash_range[1]/100,
            Coarse_Aggregate = input$Coarse_Aggregate_range[1]/100,
@@ -43,7 +43,7 @@ shinyServer(function(input, output, session) {
     
     max_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = {
         
-        data_frame(
+        tibble(
             Cement = input$Cement_range[2]/100,
             Ash = input$Ash_range[2]/100,
             Coarse_Aggregate = input$Coarse_Aggregate_range[2]/100,
