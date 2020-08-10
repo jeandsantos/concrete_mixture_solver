@@ -1,3 +1,7 @@
+# Import model
+model_strength <<- base::readRDS("models/avNNet_model.rds")
+message(Sys.time(),": Model imported")
+
 # Load required packages
 if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
@@ -7,6 +11,7 @@ if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
 if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
 # if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
+message(Sys.time(),": Packages loaded")
 
 # Create vectors for variable names and ID
 features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
@@ -14,19 +19,15 @@ features_title <- c("Cement", "Blast Furncace Slag", "Fly Ash", "Water", "Superp
 predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate")
 age_selected <- 28 # Days of aging
 
-# Import data
-if(!exists("concrete_data")) {concrete_data <- readr::read_csv("concrete_data_processed.csv", col_names = features_ID, skip = 1)}
-
-# Import model
-if(!exists("model_strength")) {model_strength <- base::readRDS("Models/avNNet_model.rds")}
 
 # Import Functions
-if(!exists("eval_function_with_limits")) {eval_function_with_limits <- base::source("StrengthFinder_app/helpers/eval_function_with_limits.R")}
-if(!exists("GA_summary_plot")) {GA_summary_plot <- base::source("StrengthFinder_app/helpers/GA_summary_plot.R")}
+eval_function_with_limits <- base::source("helpers/eval_function_with_limits.R")
+GA_summary_plot <- base::source("helpers/GA_summary_plot.R")
+message(Sys.time(),": Supporting functions imported")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
-    
+
     min_limits_GA <- reactive({ # eventExpr = input$run_GA, 
         
         data_frame(
@@ -61,6 +62,8 @@ shinyServer(function(input, output, session) {
     })
 
     GA_output <- eventReactive(eventExpr = input$run_GA, {
+        
+        model_strength <- base::readRDS("models/avNNet_model.rds")
         
         GA::ga(type = "real-valued",
                fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 

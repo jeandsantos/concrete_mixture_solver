@@ -7,7 +7,7 @@ if(!require(shinycssloaders)) {install.packages("shinycssloaders")} else {requir
 
 # Define UI 
 shinyUI(
-  navbarPage(title = strong("StrengthFinder"),
+  navbarPage(title = "StrengthFinder",
              theme = shinytheme("flatly"),
              tabPanel(title = "Solver",
                       icon = icon("bullseye"),
