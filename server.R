@@ -14,9 +14,9 @@ if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
 message(Sys.time(),": Packages loaded")
 
 # Create vectors for variable names and ID
-features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
-features_title <- c("Cement", "Blast Furncace Slag", "Fly Ash", "Water", "Superplasticizer", "Coarse Aggregate", "Fine Aggregate", "Age (days)", "Strength (MPa)")
-predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate")
+# features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
+# features_title <- c("Cement", "Blast Furncace Slag", "Fly Ash", "Water", "Superplasticizer", "Coarse Aggregate", "Fine Aggregate", "Age (days)", "Strength (MPa)")
+# predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate")
 age_selected <- 28 # Days of aging
 
 
@@ -28,7 +28,7 @@ message(Sys.time(),": Supporting functions imported")
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
-    min_limits_GA <- reactive({ # eventExpr = input$run_GA, 
+    min_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { # 
         
         data_frame(
            Cement = input$Cement_range[1]/100,
@@ -54,16 +54,16 @@ shinyServer(function(input, output, session) {
         )
     })
     
-    output$min_limits_GA_table <- renderTable({
-        
-        rbind(min_limits_GA(),
-              min_limits_GA())
-        
-    })
+    # output$min_limits_GA_table <- renderTable({
+    #     
+    #     rbind(min_limits_GA(),
+    #           min_limits_GA())
+    #     
+    # })
 
     GA_output <- eventReactive(eventExpr = input$run_GA, {
         
-        model_strength <- base::readRDS("models/avNNet_model.rds")
+        # model_strength <- base::readRDS("models/avNNet_model.rds")
         
         GA::ga(type = "real-valued",
                fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 
@@ -110,7 +110,7 @@ shinyServer(function(input, output, session) {
     
     output$GA_solution <- renderTable({ GA_solution_table() })
     
-    output$GA_output_print <- renderPrint({ 
+    output$GA_output_print <- renderText({ 
         
         if (GA_output()@fitnessValue > 0) {
             
