@@ -17,7 +17,7 @@ message(Sys.time(),": Packages loaded")
 # features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
 # features_title <- c("Cement", "Blast Furncace Slag", "Fly Ash", "Water", "Superplasticizer", "Coarse Aggregate", "Fine Aggregate", "Age (days)", "Strength (MPa)")
 # predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate")
-age_selected <- 28 # Days of aging
+# age_selected <- 28 # Days of aging
 
 
 # Import Functions
@@ -71,16 +71,16 @@ shinyServer(function(input, output, session) {
     GA_solution_table <- eventReactive(eventExpr = input$run_GA, {
         
         tibble(
-            Cement = GA_output()@solution[1, "Cement"]*100,
-            Ash = GA_output()@solution[1, "Ash"]*100,
-            Coarse_Aggregate = GA_output()@solution[1, "Coarse_Aggregate"]*100,
-            Fine_Aggregate = GA_output()@solution[1, "Fine_Aggregate"]*100,
-            Slag = GA_output()@solution[1, "Slag"]*100,
-            Superplasticizer = GA_output()@solution[1, "Superplasticizer"]*100,
-            Water = (1 - sum(GA_output()@solution[1,]))*100,
-            Age = age_selected,
+            Cement = round(GA_output()@solution[1, 1]*100, 3),
+            Ash = round(GA_output()@solution[1, 2]*100, 3),
+            Coarse_Aggregate = round(GA_output()@solution[1, 3]*100, 3),
+            Fine_Aggregate = round(GA_output()@solution[1, 4]*100, 3),
+            Slag = round(GA_output()@solution[1, 5]*100, 3),
+            Superplasticizer = round(GA_output()@solution[1, 6]*100, 3),
+            Water = round((1 - sum(GA_output()@solution[1,]))*100, 3),
+            Age = input$age,
             Strength = GA_output()@fitnessValue,
-            .name_repair = ~ c("Cement (%)", 
+            , .name_repair = ~ c("Cement (%)", 
                                  "Ash (%)", 
                                  "Coarse Aggregate (%)", 
                                  "Fine Aggregate (%)", 
@@ -89,9 +89,8 @@ shinyServer(function(input, output, session) {
                                  "Water (%)", 
                                  "Age (days)", 
                                  "Strength (MPa)")
-            )
+        )
         })
-    
     
     output$GA_solution <- renderTable({ GA_solution_table() })
     

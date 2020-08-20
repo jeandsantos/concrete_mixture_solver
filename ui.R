@@ -49,6 +49,9 @@ shinyUI(
                         column(3, sliderInput("elitism", "Elitism (%)", value = 5, min = 1, max = 99, post = "%")),
                         column(3, sliderInput("run", "Run (% of Maximum Iterations)", value = 0.25, min = 0.05, max = 0.90, step = 0.05, post = "%"))
                         ),
+                      fluidRow(
+                        column(3, sliderInput("age", "Age of concrete (days)", value = 28, min = 1, max = 180, step = 0.01))
+                      ),
                       checkboxInput(inputId = "local_search", "Perform Local Search", value = TRUE),
                       # checkboxInput(inputId = "parallel", "Parallel Computing ", value = FALSE),
                       numericInput("seed", "Seed", value = 1, min = 1, max = Inf, step = 1, width = "100px"),
