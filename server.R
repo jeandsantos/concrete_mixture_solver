@@ -7,9 +7,9 @@ if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
 if(!require(plotly)) {install.packages("plotly")} else {require(plotly)}
 if(!require(GA)) {install.packages("GA")} else {require(GA)}
-if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
+# if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
-if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
+# if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
 # if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
 message(Sys.time(),": Packages loaded")
 
@@ -45,11 +45,13 @@ shinyServer(function(input, output, session) {
     max_limits_GA <- eventReactive(eventExpr = input$run_GA, valueExpr = { range_table(idx = 2) })
     
     GA_output <- eventReactive(eventExpr = input$run_GA, {
+        message(Sys.time(),": Starting optimization algorithm")
         
         GA::ga(type = "real-valued",
                fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 
                                                                  min_limits_GA = min_limits_GA(), 
-                                                                 max_limits_GA = max_limits_GA()) },
+                                                                 max_limits_GA = max_limits_GA(), 
+                                                                 Age = input$age) },
                names = c("Cement", "Ash", "Coarse Aggregate", "Fine Aggregate", "Slag", "Superplasticizer"),
                lower = c(min_limits_GA()$Cement, min_limits_GA()$Ash, 
                          min_limits_GA()$Coarse_Aggregate, min_limits_GA()$Fine_Aggregate, 
@@ -69,6 +71,7 @@ shinyServer(function(input, output, session) {
         })
     
     GA_solution_table <- eventReactive(eventExpr = input$run_GA, {
+        message(Sys.time(),": Creating solution table")
         
         tibble(
             Cement = round(GA_output()@solution[1, 1]*100, 3),
@@ -80,22 +83,21 @@ shinyServer(function(input, output, session) {
             Water = round((1 - sum(GA_output()@solution[1,]))*100, 3),
             Age = input$age,
             Strength = GA_output()@fitnessValue,
-            , .name_repair = ~ c("Cement (%)", 
-                                 "Ash (%)", 
-                                 "Coarse Aggregate (%)", 
-                                 "Fine Aggregate (%)", 
-                                 "Slag (%)", 
-                                 "Superplasticizer (%)", 
-                                 "Water (%)", 
-                                 "Age (days)", 
-                                 "Strength (MPa)")
+            .name_repair = ~ c("Cement (%)", 
+                               "Ash (%)", 
+                               "Coarse Aggregate (%)", 
+                               "Fine Aggregate (%)", 
+                               "Slag (%)", 
+                               "Superplasticizer (%)", 
+                               "Water (%)", 
+                               "Age (days)", 
+                               "Strength (MPa)")
         )
         })
     
     output$GA_solution <- renderTable({ GA_solution_table() })
     
     output$GA_output_print <- renderText({ 
-        
         if (GA_output()@fitnessValue > 0) {
             
             (paste0("Genetic Algorithm successfully found a feasible solution after ", GA_output()@iter, " iterations. ", 
@@ -119,7 +121,34 @@ shinyServer(function(input, output, session) {
         }
     )
     
+    # solution_table_export <- isolate({ GA_solution_table() })
+    # message(paste0(Sys.time(), ": created `solution_table_export`"))
+    # print(solution_table_export)
     
+    output$report <- downloadHandler(
+        filename = paste("StrenthFinder solution report - ", gsub(pattern = ":", replacement = "", Sys.time()), ".html", sep = ""),
+        content = function(file) {
+            
+            
+            # Set up parameters to pass to Rmd document
+            params <- list(tmp_df = output$GA_solution)
+            
+            # Copy the report file to a temporary directory before processing it
+            tempReport <- file.path(tempdir(), "report.Rmd")
+            file.copy("report.Rmd", tempReport, overwrite = TRUE)
+            
+            
+            id <- showNotification("Rendering report...", duration = NULL, closeButton = FALSE)
+            on.exit(removeNotification(id), add = TRUE)
+            
+            # Knit the document
+            rmarkdown::render(tempReport, 
+                              output_file = file,
+                              params = params,
+                              envir = new.env(parent = globalenv())
+            )
+            }
+        )
 })
 
 

@@ -16,23 +16,25 @@ shinyUI(
              tabPanel(title = "Solver",
                       icon = icon("bullseye"),
                       sidebarLayout(
-                        sidebarPanel(h4(strong("Component Ranges")),
-                                     slider_ranges("Cement_range", "Cement", value = c(4, 25)),
-                                     slider_ranges("Ash_range", "Ash", value = c(0, 10)), 
-                                     slider_ranges("Coarse_Aggregate_range", "Coarse Aggregate", value = c(30, 55)),
-                                     slider_ranges("Fine_Aggregate_range", "Fine Aggregate",  value = c(20, 45)),
-                                     slider_ranges("Slag_range", "Slag",  value = c(0, 20)),
-                                     slider_ranges("Superplasticizer_range", "Superplasticizer",  value = c(0, 1), step = 0.05, max = 3),
-                                     slider_ranges("Water_range", "Water", value = c(5, 12), max=15),
-                                     actionButton("run_GA", "Run Solver", width = "170px", icon = icon("bullseye")), br(),br(),
-                                     downloadButton("downloadData", "Download Results"),
-                                     width = 3
-                                     ),
+                        sidebarPanel(
+                          actionButton("run_GA", "Run Solver", width = "250px", icon = icon("bullseye")), br(), br(),
+                          h4(strong("Component Ranges")),
+                          slider_ranges("Cement_range", "Cement", value = c(4, 25)),
+                          slider_ranges("Ash_range", "Ash", value = c(0, 10)), 
+                          slider_ranges("Coarse_Aggregate_range", "Coarse Aggregate", value = c(30, 55)),
+                          slider_ranges("Fine_Aggregate_range", "Fine Aggregate",  value = c(20, 45)),
+                          slider_ranges("Slag_range", "Slag",  value = c(0, 20)),
+                          slider_ranges("Superplasticizer_range", "Superplasticizer",  value = c(0, 1), step = 0.05, max = 3),
+                          slider_ranges("Water_range", "Water", value = c(5, 12), max=15),
+                          downloadButton("downloadData", "Download Results"), br(),br(),
+                          downloadButton("report", "Generate report"),
+                          width = 3
+                        ),
                         mainPanel(
                           # tableOutput(outputId = "min_limits_GA_table"),
-                          h5(textOutput(outputId = "GA_output_print")),
+                          h4(textOutput(outputId = "GA_output_print")),
                           tableOutput(outputId = "GA_solution"),
-                          withSpinner(plotlyOutput("GA_plot"), size = 2)
+                          withSpinner(plotlyOutput("GA_plot"), size = 3)
                           )
                         )
                       ),
@@ -40,8 +42,8 @@ shinyUI(
                       icon = icon("cog"),
                       h4("Settings for genetic algorithm"),
                       fluidRow(
-                        column(3, sliderInput("pop_size", "Population Size", value = 10, min = 10, max = 500, step = 10)),
-                        column(3, sliderInput("max_iter", "Maximum Iterations", value = 10, min = 10, max = 1000, step = 10)),
+                        column(3, sliderInput("pop_size", "Population Size", value = 10, min = 5, max = 500, step = 5)),
+                        column(3, sliderInput("max_iter", "Maximum Iterations", value = 3, min = 3, max = 1000, step = 5)),
                         column(3, sliderInput("pcrossover", "Probability of crossover", value = 0.8, min = 0, max = 1, step = 0.01))
                         ),
                       fluidRow(

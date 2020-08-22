@@ -1,4 +1,4 @@
-eval_function_with_limits <- function(Cement, Ash, Coarse_Aggregate, Fine_Aggregate, Slag, Superplasticizer, min_limits_GA, max_limits_GA) {
+eval_function_with_limits <- function(Cement, Ash, Coarse_Aggregate, Fine_Aggregate, Slag, Superplasticizer, min_limits_GA, max_limits_GA, Age = 28) {
   
   Water = 1 - sum(Cement, Ash, Coarse_Aggregate, Fine_Aggregate, Slag, Superplasticizer)
   
@@ -11,7 +11,7 @@ eval_function_with_limits <- function(Cement, Ash, Coarse_Aggregate, Fine_Aggreg
     Slag = Slag,
     Superplasticizer = Superplasticizer,
     Water = Water,
-    Age = 28
+    Age = Age
   )
   
   # predict(model_strength, newdata = input_data)[[1]]
