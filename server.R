@@ -2,6 +2,12 @@
 model_strength <<- base::readRDS("models/avNNet_model.rds")
 message(Sys.time(),": Model imported")
 
+# Import Functions
+eval_function_with_limits <- base::source("helpers/eval_function_with_limits.R")
+GA_summary_plot <- base::source("helpers/GA_summary_plot.R")
+save_to_temp_dir <- base::source("helpers/save_to_temp_dir.R")
+message(Sys.time(),": Supporting functions imported")
+
 # Load required packages
 if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
@@ -20,10 +26,6 @@ message(Sys.time(),": Packages loaded")
 # age_selected <- 28 # Days of aging
 
 
-# Import Functions
-eval_function_with_limits <- base::source("helpers/eval_function_with_limits.R")
-GA_summary_plot <- base::source("helpers/GA_summary_plot.R")
-message(Sys.time(),": Supporting functions imported")
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -121,22 +123,39 @@ shinyServer(function(input, output, session) {
         }
     )
     
-    # solution_table_export <- isolate({ GA_solution_table() })
-    # message(paste0(Sys.time(), ": created `solution_table_export`"))
-    # print(solution_table_export)
+    # observeEvent(eventExpr = input$run_GA, {
+    #     
+    #     # x_react <- reactive( tibble(a = 1, b = 2, c = 3) )
+    #     # x_iso <- isolate({ x_react() })
+    #     # export_df <- x_iso
+    #     
+    #     export_df <- isolate({ GA_solution_table() })
+    #     message(paste0(Sys.time(), ": created `export_df`"))
+    #     print(export_df)
+    # })
     
     output$report <- downloadHandler(
         filename = paste("StrenthFinder solution report - ", gsub(pattern = ":", replacement = "", Sys.time()), ".html", sep = ""),
-        content = function(file) {
+        content = function(file) { # , df = export_df
             
+            search_output <- isolate({ GA_output() })
+            saveRDS(search_output, file = "search_output.rds")
+            message(paste0(Sys.time(), ": created `search_output.rds`"))
+            save_to_temp_dir("search_output.rds")
+            
+            df <- isolate({ GA_solution_table() })
+            write.csv(df, "export_df.csv")
+            message(paste0(Sys.time(), ": created `export_df.csv`"))
+            save_to_temp_dir("export_df.csv")
             
             # Set up parameters to pass to Rmd document
-            params <- list(tmp_df = output$GA_solution)
+            params <- list(
+                temp_df_dir = temp_df_dir,
+                search_output = search_output)
             
             # Copy the report file to a temporary directory before processing it
             tempReport <- file.path(tempdir(), "report.Rmd")
             file.copy("report.Rmd", tempReport, overwrite = TRUE)
-            
             
             id <- showNotification("Rendering report...", duration = NULL, closeButton = FALSE)
             on.exit(removeNotification(id), add = TRUE)

@@ -17,7 +17,8 @@ output:
       collapsed: yes
       smooth_scroll: yes
 params:
-  tmp_df: NA
+  temp_df_dir: NA
+  search_output: NA
 ---
 
 
@@ -27,7 +28,7 @@ knitr::opts_chunk$set(fig.align = 'center', echo = TRUE)
 
 
 ```{r}
-library(readr)
+# library(readr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
@@ -36,13 +37,47 @@ library(plotly)
 
 ```{r}
 print("hello world!")
+print(Sys.time())
 ```
-
+This report was automatically generated on the `r format(Sys.time(), '%d %B %Y')`
 
 
 ```{r}
-params$tmp_df
+print(params$temp_df_dir)
+
+df <- read.csv(params$temp_df_dir)
+print(df)
 ```
+```{r}
+print(search_output)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

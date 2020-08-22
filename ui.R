@@ -27,7 +27,7 @@ shinyUI(
                           slider_ranges("Superplasticizer_range", "Superplasticizer",  value = c(0, 1), step = 0.05, max = 3),
                           slider_ranges("Water_range", "Water", value = c(5, 12), max=15),
                           downloadButton("downloadData", "Download Results"), br(),br(),
-                          downloadButton("report", "Generate report"),
+                          downloadButton("report", "Generate report   "),
                           width = 3
                         ),
                         mainPanel(
