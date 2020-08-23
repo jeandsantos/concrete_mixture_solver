@@ -47,7 +47,7 @@ predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse
 age_selected <- 28 # Days of aging
 
 # Import model
-if(!exists("model_strength")) {model_strength <- base::readRDS("Models/avNNet_model.rds")}
+if(!exists("model_strength")) {model_strength <- base::readRDS("models/avNNet_model.rds")}
 
 # Import Functions
 base::source("helpers/eval_function_with_limits.R")

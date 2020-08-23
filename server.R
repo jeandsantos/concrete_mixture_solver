@@ -14,9 +14,8 @@ if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinyt
 if(!require(plotly)) {install.packages("plotly")} else {require(plotly)}
 if(!require(GA)) {install.packages("GA")} else {require(GA)}
 if(!require(knitr)) {install.packages("knitr")} else {require(knitr)}
-# if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
+if(!require(tibble)) {install.packages("tibble")} else {require(tibble)}
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
-# if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
 # if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
 message(Sys.time(),": Packages loaded")
 

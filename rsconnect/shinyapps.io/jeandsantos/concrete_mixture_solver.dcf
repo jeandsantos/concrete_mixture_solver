@@ -1,0 +1,13 @@
+name: concrete_mixture_solver
+title: concrete_mixture_solver
+username:
+account: jeandsantos
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2698306
+bundleId: 3548819
+url: https://jeandsantos.shinyapps.io/concrete_mixture_solver/
+when: 1598216083.70775
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|.Rprofile|export_df.csv|LICENSE|README.md|search_output.rds|shiny-renv.R|shiny-run.R|Testing.html|Testing.Rmd|x.csv|x_iso.csv|x_test.csv|data/Concrete_Data.xls|data/concrete_data_processed.csv|helpers/eval_function_with_limits_01.R

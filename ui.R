@@ -13,6 +13,7 @@ slider_ranges <- function(id, label, value, step=0.5, min = 0, max = 100, post="
 shinyUI(
   navbarPage(title = "StrengthFinder",
              theme = shinytheme("flatly"),
+             windowTitle = "StrengthFinder: Concrete Mixture Optimization",
              tabPanel(title = "Solver",
                       icon = icon("bullseye"),
                       sidebarLayout(
@@ -62,9 +63,14 @@ shinyUI(
              tabPanel(title = "Instructions",
                       icon = icon("align-left"),
                       br(),
-                      ("Use the sliders to change the value of each parameter. The values of the properties are predicted based on the selected values."),
-                      br(),br(),
-                      ("The table displays the ...")
+                      ("1. Use the sliders to define the lower and upper limits for each component to be used in the concrete mixture."), br(),
+                      ("2. Click on 'Run Solver' to start the search for an optimized mixture under the previously defined constraints."), br(),
+                      ("3. Once the solver optimization algorithm has completed its search, the results will be display on the main pane of the solver tab."), br(),
+                      ("4. You can download the results by clicking on the 'Download Results' button or create a report by clicking on 'Generate Report'."), br(),
+                      hr(), br(),
+                      ("The parameters for the optimization algorithm can be changed on the 'Settings' tab."), br(),
+                      ("Higher values for the population size and the maximum number of iterations generally result in better outcomes at the cost of longer computing times."), br(),
+                      br(),br()
              ),
              tabPanel(title = "About",
                       icon = icon("info-circle"),
