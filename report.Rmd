@@ -1,7 +1,8 @@
 ---
 title: "StrengthFinder Solution Report"
 subtitle: "Report of generated solution for concrete mixture optimization"
-date: "Created on the `r format(Sys.time(), '%d %B %Y')`"
+author: "App developed by [Jean Dos Santos](https://www.linkedin.com/in/jeandsantos/)"
+date: "Report Created on the `r format(Sys.time(), '%d %B %Y')`"
 output:
   bookdown::html_document2:
     code_folding: hide
@@ -75,6 +76,8 @@ tibble(
   knitr::kable(format = "markdown", digits = 3, align = "c", col.names = "Values", label = "Result of optimization algorithm.")
 ```
 
+
+
 The plot below displays the evolution of fitness scores of the optimization algorithm. The algorithm stopped after `r search_output@iter` iterations.
 
 ```{r, fig.cap="Evolution of fitness scores of the optimization algorithm.", out.width='100%', fig.align='center'}
@@ -119,7 +122,7 @@ tibble(
 
 This report was automatically generated on the `r format(Sys.time(), '%d %B %Y')`.
 
-For questions or feedback please contact [Jean Dos Santos](https://www.linkedin.com/in/jeandsantos/) using [email](mailto:jeandsantos88@gmail.com), [LinkedIn](https://www.linkedin.com/in/jeandsantos/) or [GitHub](https://github.com/jeandsantos/).
+For questions or feedback please contact [Jean Dos Santos](https://www.linkedin.com/in/jeandsantos/) via [email](mailto:jeandsantos88@gmail.com?subject=StrengthFinder%20App%20-%20Concrete%20Mixture%20Optimization), [LinkedIn](https://www.linkedin.com/in/jeandsantos/) or [GitHub](https://github.com/jeandsantos/).
 
 ***
 

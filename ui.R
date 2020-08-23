@@ -69,11 +69,15 @@ shinyUI(
              tabPanel(title = "About",
                       icon = icon("info-circle"),
                       br(),
-                      ("For app documentation and code visit the "), a(href = "https://github.com/jeandsantos/", "GitHub page"),
+                      ("For app documentation and code visit the "), 
+                      a(href = "https://github.com/jeandsantos/concrete_mixture_solver", "GitHub repository."),
                       br(),br(),
-                      ("Information about the models used are available via this "), a(href = "https://rpubs.com/jeandsantos88/", "link."),
+                      ("Information about the predictive model used is available via this "), 
+                      a(href = "https://rpubs.com/jeandsantos88/Concrete_Mixture_Optimization", "link."),
                       br(),br(),
-                      ("For questions or feedback please contact via "), a(href = "https://www.linkedin.com/in/jeandsantos/", "LinkedIn"), (" or "), a(href = "https://github.com/jeandsantos/", "GitHub")
+                      ("For questions or feedback please contact via "), a(href = "https://www.linkedin.com/in/jeandsantos/", "LinkedIn"), 
+                      (", "), a(href = "https://github.com/jeandsantos/", "GitHub"),
+                      (" or "), a(href = "mailto:jeandsantos88@gmail.com", "email.")
                       ),
              tags$hr(),
              tags$span(style="color:grey", tags$footer(h4(("Made by "),strong(tags$a(href = "https://www.linkedin.com/in/jeandsantos/", target = "_blank", "Jean Dos Santos"))),

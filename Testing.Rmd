@@ -1,6 +1,6 @@
 ---
 title: "Testing"
-author: "Jean Dos Santos"
+author: "App developed by [Jean Dos Santos](https://www.linkedin.com/in/jeandsantos/)"
 date: "07/01/2020"
 output: 
   bookdown::html_document2:
