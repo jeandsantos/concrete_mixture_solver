@@ -1283,13 +1283,13 @@ window.initializeCodeFolding = function(show) {
   var currentIndex = 1;
 
   // select all R code blocks
-  var rCodeBlocks = $('pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.julia');
+  var rCodeBlocks = $('pre.r, pre.python, pre.bash, pre.sql, pre.cpp, pre.stan, pre.julia, pre.foldable');
   rCodeBlocks.each(function() {
 
     // create a collapsable div to wrap the code in
     var div = $('<div class="collapse r-code-collapse"></div>');
-    if (show || $(this)[0].classList.contains('fold-show'))
-      div.addClass('in');
+    show = (show || $(this).hasClass('fold-show')) && !$(this).hasClass('fold-hide');
+    if (show) div.addClass('in');
     var id = 'rcode-643E0F36' + currentIndex++;
     div.attr('id', id);
     $(this).before(div);
@@ -1323,6 +1323,22 @@ window.initializeCodeFolding = function(show) {
   });
 
 }
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
 </script>
 <style type="text/css">.pagedtable {
 overflow: auto;
@@ -3328,21 +3344,21 @@ loaded via a namespace (and not attached):
 [19] colorspace_1.4-1     recipes_0.1.10       htmltools_0.4.0     
 [22] Matrix_1.2-14        plyr_1.8.6           timeDate_3043.102   
 [25] pkgconfig_2.0.3      broom_0.5.5          haven_2.2.0         
-[28] scales_1.1.0         gower_0.2.1          lava_1.6.7          
-[31] generics_0.0.2       ellipsis_0.3.1       withr_2.2.0         
-[34] nnet_7.3-12          cli_2.0.2            survival_2.42-3     
-[37] magrittr_1.5         crayon_1.3.4         readxl_1.3.1        
-[40] evaluate_0.14        fs_1.4.1             fansi_0.4.1         
-[43] nlme_3.1-137         MASS_7.3-50          xml2_1.3.2          
-[46] class_7.3-14         data.table_1.12.8    tools_3.5.1         
-[49] hms_0.5.3            lifecycle_0.2.0      munsell_0.5.0       
-[52] reprex_0.3.0         compiler_3.5.1       rlang_0.4.7         
-[55] grid_3.5.1           rstudioapi_0.11      rmarkdown_2.1       
-[58] gtable_0.3.0         ModelMetrics_1.2.2.2 codetools_0.2-15    
-[61] DBI_1.1.0            reshape2_1.4.3       R6_2.4.1            
-[64] lubridate_1.7.8      stringi_1.4.6        Rcpp_1.0.5          
-[67] vctrs_0.3.2          rpart_4.1-13         dbplyr_1.4.2        
-[70] tidyselect_1.0.0     xfun_0.16           </code></pre>
+[28] bookdown_0.20        scales_1.1.0         gower_0.2.1         
+[31] lava_1.6.7           generics_0.0.2       ellipsis_0.3.1      
+[34] withr_2.2.0          nnet_7.3-12          cli_2.0.2           
+[37] survival_2.42-3      magrittr_1.5         crayon_1.3.4        
+[40] readxl_1.3.1         evaluate_0.14        fs_1.4.1            
+[43] fansi_0.4.1          nlme_3.1-137         MASS_7.3-50         
+[46] xml2_1.3.2           class_7.3-14         data.table_1.12.8   
+[49] tools_3.5.1          hms_0.5.3            lifecycle_0.2.0     
+[52] munsell_0.5.0        reprex_0.3.0         compiler_3.5.1      
+[55] rlang_0.4.7          grid_3.5.1           rstudioapi_0.11     
+[58] rmarkdown_2.3        ModelMetrics_1.2.2.2 gtable_0.3.0        
+[61] codetools_0.2-15     DBI_1.1.0            reshape2_1.4.3      
+[64] R6_2.4.1             lubridate_1.7.8      stringi_1.4.6       
+[67] Rcpp_1.0.5           vctrs_0.3.2          rpart_4.1-13        
+[70] dbplyr_1.4.2         tidyselect_1.0.0     xfun_0.16           </code></pre>
 </div>
 
 
@@ -3382,7 +3398,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeCodeFolding("show" === "show");
+  window.initializeCodeFolding("hide" === "show");
 });
 </script>
 
@@ -3400,7 +3416,7 @@ $(document).ready(function ()  {
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
       },
       ignoreSelector: ".toc-ignore",
       scrollTo: 0

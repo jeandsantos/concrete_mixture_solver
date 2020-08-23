@@ -1,11 +1,10 @@
 ---
 title: "StrengthFinder Solution Report"
 subtitle: "Report of generated solution for concrete mixture optimization"
-author: "StrengthFinder"
 date: "Created on the `r format(Sys.time(), '%d %B %Y')`"
 output:
-  html_document:
-    code_folding: show
+  bookdown::html_document2:
+    code_folding: hide
     df_print: paged
     highlight: tango
     number_sections: yes
@@ -16,74 +15,127 @@ output:
     toc_float:
       collapsed: yes
       smooth_scroll: yes
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 2
 params:
   temp_df_dir: NA
   search_output_dir: NA
   age: NA
 ---
 
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(fig.align = 'center', echo = TRUE)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = FALSE, warning = FALSE, comment = NA, fig.align = 'center')
 ```
 
 
 ```{r}
-# library(readr)
-library(dplyr)
-library(ggplot2)
-library(knitr)
-library(plotly)
-```
-
-```{r}
-print("hello world!")
-print(Sys.time())
-```
-
-This report was automatically generated on the `r format(Sys.time(), '%d %B %Y')`
-
-
-```{r}
-print(params$temp_df_dir)
+if(!require(GA)) {install.packages("GA")} else {require(GA)}
+if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
+if(!require(caret)) {install.packages("caret")} else {require(caret)}
+if(!require(knitr)) {install.packages("knitr")} else {require(knitr)}
+if(!require(bookdown)) {install.packages("bookdown")} else {require(bookdown)}
 
 df <- read.csv(params$temp_df_dir)
-print(df)
+search_output <- readRDS(params$search_output_dir)
 ```
+
+
+***
+
+# Solution 
+
+The optimization algorithm found a concrete mixture with a predicted compressive strength of **`r round(search_output@fitnessValue, 3)` MPa** after `r search_output@iter` iterations.
 
 ```{r}
-print(params$search_output_dir)
-
-search_output <- readRDS(params$search_output_dir)
-search_output
+tibble(
+    Strength = search_output@fitnessValue,
+    Age = params$age,
+    Cement = round(search_output@solution[1, "Cement"]*100, 3),
+    Ash = round(search_output@solution[1, "Ash"]*100, 3),
+    Coarse_Aggregate = round(search_output@solution[1, "Coarse Aggregate"]*100, 3),
+    Fine_Aggregate = round(search_output@solution[1, "Fine Aggregate"]*100, 3),
+    Slag = round(search_output@solution[1, "Slag"]*100, 3),
+    Superplasticizer = round(search_output@solution[1, "Superplasticizer"]*100, 3),
+    Water = round((1 - sum(search_output@solution[1,]))*100, 3),
+    .name_repair = ~ c("Strength (MPa)",
+                       "Age (days)", 
+                       "Cement (%)", 
+                       "Ash (%)", 
+                       "Coarse Aggregate (%)", 
+                       "Fine Aggregate (%)", 
+                       "Slag (%)", 
+                       "Superplasticizer (%)", 
+                       "Water (%)"
+                       )) %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  knitr::kable(format = "markdown", digits = 3, align = "c", col.names = "Values", label = "Result of optimization algorithm.")
 ```
 
+The plot below displays the evolution of fitness scores of the optimization algorithm. The algorithm stopped after `r search_output@iter` iterations.
 
+```{r, fig.cap="Evolution of fitness scores of the optimization algorithm.", out.width='100%', fig.align='center'}
+GA::plot.ga(search_output)
+```
 
+***
 
+# Search Parameters
 
+The table below displays the limits used for optimization algorithm.
 
+```{r}
+tibble(
+    Component = paste(search_output@names, "(%)"),
+    `Lower Limits` = search_output@lower*100,
+    `Upper Limits` = search_output@upper*100,
+    `Solution` = round(search_output@solution[1, ]*100, 3)) %>% 
+  mutate(`Abides Limits` = if_else((`Solution` <= `Upper Limits`) & (`Solution` >= `Lower Limits`), TRUE, FALSE)) %>% 
+  kable(row.names = TRUE, format = "markdown", align = "lcccc", digits = 3, label = "Limits used for inputs of optimization algorithm.")
+```
 
+The table below displays the values for the main settings used by the optimization algorithm.
 
+```{r}
+tibble(
+  `Population Size` = search_output@popSize,
+  `Number of iterations` = search_output@iter,
+  `Maximum number of iterations` = search_output@maxiter,
+  `Probability of Crossover` = search_output@pcrossover,
+  `Probability of Mutation` = search_output@pmutation,
+  `Elitism (%)` = search_output@elitism,
+  `Run` = search_output@run, 
+  `Perform local optimization` = search_output@optim) %>% 
+  t() %>% 
+  kable(col.names = "Value", format = "markdown", digits = 2, align = "lc", label = "Settings of optimization algorithm.")
+```
 
+***
 
+# Additional Information
 
+This report was automatically generated on the `r format(Sys.time(), '%d %B %Y')`.
 
+For questions or feedback please contact [Jean Dos Santos](https://www.linkedin.com/in/jeandsantos/) using [email](mailto:jeandsantos88@gmail.com), [LinkedIn](https://www.linkedin.com/in/jeandsantos/) or [GitHub](https://github.com/jeandsantos/).
 
+***
 
+System information:  
 
+```{r}
+Sys.info()
+```
 
+***
 
+Session information:  
 
+```{r}
+sessionInfo()
+```
 
-
-
-
-
-
-
-
-
-
-
+***
 

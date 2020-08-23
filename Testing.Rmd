@@ -2,8 +2,8 @@
 title: "Testing"
 author: "Jean Dos Santos"
 date: "07/01/2020"
-output:
-  html_document:
+output: 
+  bookdown::html_document2:
     code_folding: hide
     df_print: paged
     highlight: tango
@@ -164,6 +164,9 @@ GA_output <- GA::ga(type = "real-valued",
                monitor = FALSE
                )
 ```
+
+
+
 The optimization algorithm found a concrete mixture with a compressive strength of `r round(GA_output@fitnessValue, 3)` MPa after `r GA_output@iter` iterations.
 
 # Solution
