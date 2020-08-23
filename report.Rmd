@@ -38,6 +38,7 @@ if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
 if(!require(knitr)) {install.packages("knitr")} else {require(knitr)}
 if(!require(tibble)) {install.packages("tibble")} else {require(tibble)}
+if(!require(dplyr)) {install.packages("dplyr")} else {require(dplyr)}
 if(!require(bookdown)) {install.packages("bookdown")} else {require(bookdown)}
 
 df <- read.csv(params$temp_df_dir)
@@ -97,7 +98,7 @@ tibble(
     `Lower Limits` = search_output@lower*100,
     `Upper Limits` = search_output@upper*100,
     `Solution` = round(search_output@solution[1, ]*100, 3)) %>% 
-  mutate(`Abides Limits` = ifelse((`Solution` <= `Upper Limits`) & (`Solution` >= `Lower Limits`), TRUE, FALSE)) %>% 
+  mutate(`Abides Limits` = if_else((`Solution` <= `Upper Limits`) & (`Solution` >= `Lower Limits`), TRUE, FALSE)) %>% 
   kable(row.names = TRUE, format = "markdown", align = "lcccc", digits = 3, label = "Limits used for inputs of optimization algorithm.")
 ```
 

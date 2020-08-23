@@ -43,8 +43,8 @@ shinyUI(
                       icon = icon("cog"),
                       h4("Settings for genetic algorithm"),
                       fluidRow(
-                        column(3, sliderInput("pop_size", "Population Size", value = 10, min = 5, max = 500, step = 5)),
-                        column(3, sliderInput("max_iter", "Maximum Iterations", value = 3, min = 3, max = 1000, step = 5)),
+                        column(3, sliderInput("pop_size", "Population Size", value = 10, min = 10, max = 500, step = 5)),
+                        column(3, sliderInput("max_iter", "Maximum Iterations", value = 5, min = 5, max = 1000, step = 5)),
                         column(3, sliderInput("pcrossover", "Probability of crossover", value = 0.8, min = 0, max = 1, step = 0.01))
                         ),
                       fluidRow(
