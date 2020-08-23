@@ -3,9 +3,9 @@ model_strength <<- base::readRDS("models/avNNet_model.rds")
 message(Sys.time(),": Model imported")
 
 # Import Functions
-eval_function_with_limits <- base::source("helpers/eval_function_with_limits.R")
-GA_summary_plot <- base::source("helpers/GA_summary_plot.R")
-save_to_temp_dir <- base::source("helpers/save_to_temp_dir.R")
+base::source("helpers/eval_function_with_limits.R")
+base::source("helpers/GA_summary_plot.R")
+base::source("helpers/save_to_temp_dir.R")
 message(Sys.time(),": Supporting functions imported")
 
 # Load required packages
@@ -13,6 +13,7 @@ if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
 if(!require(plotly)) {install.packages("plotly")} else {require(plotly)}
 if(!require(GA)) {install.packages("GA")} else {require(GA)}
+if(!require(knitr)) {install.packages("knitr")} else {require(knitr)}
 # if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
 # if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
@@ -23,9 +24,6 @@ message(Sys.time(),": Packages loaded")
 # features_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate", "Age", "Strength")
 # features_title <- c("Cement", "Blast Furncace Slag", "Fly Ash", "Water", "Superplasticizer", "Coarse Aggregate", "Fine Aggregate", "Age (days)", "Strength (MPa)")
 # predictors_ID <- c("Cement", "Slag", "Ash", "Water", "Superplasticizer", "Coarse_Aggregate", "Fine_Aggregate")
-# age_selected <- 28 # Days of aging
-
-
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
@@ -123,35 +121,25 @@ shinyServer(function(input, output, session) {
         }
     )
     
-    # observeEvent(eventExpr = input$run_GA, {
-    #     
-    #     # x_react <- reactive( tibble(a = 1, b = 2, c = 3) )
-    #     # x_iso <- isolate({ x_react() })
-    #     # export_df <- x_iso
-    #     
-    #     export_df <- isolate({ GA_solution_table() })
-    #     message(paste0(Sys.time(), ": created `export_df`"))
-    #     print(export_df)
-    # })
-    
     output$report <- downloadHandler(
         filename = paste("StrenthFinder solution report - ", gsub(pattern = ":", replacement = "", Sys.time()), ".html", sep = ""),
-        content = function(file) { # , df = export_df
+        content = function(file) { 
             
             search_output <- isolate({ GA_output() })
             saveRDS(search_output, file = "search_output.rds")
             message(paste0(Sys.time(), ": created `search_output.rds`"))
-            save_to_temp_dir("search_output.rds")
+            search_output_dir <- save_to_temp_dir("search_output.rds")
             
             df <- isolate({ GA_solution_table() })
             write.csv(df, "export_df.csv")
             message(paste0(Sys.time(), ": created `export_df.csv`"))
-            save_to_temp_dir("export_df.csv")
+            temp_df_dir <- save_to_temp_dir("export_df.csv")
             
             # Set up parameters to pass to Rmd document
             params <- list(
                 temp_df_dir = temp_df_dir,
-                search_output = search_output)
+                search_output_dir = search_output_dir,
+                age = input$age)
             
             # Copy the report file to a temporary directory before processing it
             tempReport <- file.path(tempdir(), "report.Rmd")

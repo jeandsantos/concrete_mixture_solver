@@ -2,21 +2,34 @@
 title: "Testing"
 author: "Jean Dos Santos"
 date: "07/01/2020"
-output: html_document
+output:
+  html_document:
+    code_folding: hide
+    df_print: paged
+    highlight: tango
+    number_sections: yes
+    rows.print: 10
+    theme: cerulean
+    toc: yes
+    toc_depth: 3
+    toc_float:
+      collapsed: yes
+      smooth_scroll: yes
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, error = FALSE, warning = FALSE, comment = NA, fig.align = 'center')
+```
 # Load Packages
 
-```{r}
+```{r, warning=FALSE, message=FALSE, error=FALSE}
 # if(!require(shiny)) {install.packages("shiny")} else {require(shiny)}
 # if(!require(shinythemes)) {install.packages("shinythemes")} else {require(shinythemes)}
 if(!require(GA)) {install.packages("GA")} else {require(GA)}
 if(!require(tidyverse)) {install.packages("tidyverse")} else {require(tidyverse)}
 if(!require(caret)) {install.packages("caret")} else {require(caret)}
+if(!require(knitr)) {install.packages("knitr")} else {require(knitr)}
 # if(!require(DT)) {install.packages("DT")} else {require(DT)}
 # if(!require(nnet)) {install.packages("nnet")} else {require(nnet)}
 # if(!require(parallel)) {install.packages("parallel")} else {require(parallel)}
@@ -37,12 +50,20 @@ age_selected <- 28 # Days of aging
 if(!exists("model_strength")) {model_strength <- base::readRDS("Models/avNNet_model.rds")}
 
 # Import Functions
-eval_function_with_limits <- base::source("helpers/eval_function_with_limits.R")
-GA_summary_plot <- base::source("helpers/GA_summary_plot.R")
+base::source("helpers/eval_function_with_limits.R")
+base::source("helpers/GA_summary_plot.R")
 message(Sys.time(),": Supporting functions imported")
 ```
 
 ```{r}
+Cement_range <- c(0.04, 0.25)
+Ash_range <- c(0.0, 0.10)
+Coarse_Aggregate_range <- c(0.30, 0.55)
+Fine_Aggregate_range <- c(0.20, 0.45)
+Slag_range <- c(0.0, 0.20)
+Superplasticizer_range <- c(0.0, 0.01)
+Water_range <- c(0.05, 0.12)
+
 limits_GA <- data_frame(
        Cement_min = Cement_range[1],
        Cement_max = Cement_range[2],
@@ -81,13 +102,13 @@ max_limits_GA <- data_frame(
        )
 
 mid_values_GA <- data_frame(
-       Cement = Cement_range[3],
-       Ash = Ash_range[3],
-       Coarse_Aggregate = Coarse_Aggregate_range[3],
-       Fine_Aggregate = Fine_Aggregate_range[3],
-       Slag = Slag_range[3],
-       Superplasticizer = Superplasticizer_range[3],
-       Water = Water_range[3]
+       Cement = mean(Cement_range),
+       Ash = mean(Ash_range),
+       Coarse_Aggregate = mean(Coarse_Aggregate_range),
+       Fine_Aggregate = mean(Fine_Aggregate_range),
+       Slag = mean(Slag_range),
+       Superplasticizer = mean(Superplasticizer_range),
+       Water = mean(Water_range)
        )
 
 limits_GA
@@ -97,46 +118,145 @@ mid_values_GA
 ```
 
 ```{r}
-Cement = range$mid[range$Parameter == "Cement"]
-Ash = range$mid[range$Parameter == "Ash"]
-Coarse_Aggregate = range$mid[range$Parameter == "Coarse_Aggregate"]
-Fine_Aggregate = range$mid[range$Parameter == "Fine_Aggregate"]
-Slag = range$mid[range$Parameter == "Slag"]
-Superplasticizer = range$mid[range$Parameter == "Superplasticizer"]
-Water = range$mid[range$Parameter == "Water"]
+Cement = mid_values_GA["Cement"]
+Ash = mid_values_GA["Ash"]
+Coarse_Aggregate = mid_values_GA["Coarse_Aggregate"]
+Fine_Aggregate = mid_values_GA["Fine_Aggregate"]
+Slag = mid_values_GA["Slag"]
+Superplasticizer = mid_values_GA["Superplasticizer"]
+Water = mid_values_GA["Water"]
+Age = 28
 
 input_data <- tibble(
-  Cement = Cement,
-  Ash = Ash,
-  Coarse_Aggregate = Coarse_Aggregate,
-  Fine_Aggregate = Fine_Aggregate,
-  Slag = Slag,
-  Superplasticizer = Superplasticizer,
-  Water = Water,
-  Age = 28
+  Cement = Cement[[1]],
+  Ash = Ash[[1]],
+  Coarse_Aggregate = Coarse_Aggregate[[1]],
+  Fine_Aggregate = Fine_Aggregate[[1]],
+  Slag = Slag[[1]],
+  Superplasticizer = Superplasticizer[[1]],
+  Water = Water[[1]],
+  Age = Age[[1]]
 )
 ```
 
 # `eval_function`
 
+```{r}
+GA_output <- GA::ga(type = "real-valued",
+               fitness = function(x) { eval_function_with_limits(x[1], x[2], x[3], x[4], x[5], x[6], 
+                                                                 min_limits_GA = min_limits_GA, 
+                                                                 max_limits_GA = max_limits_GA, 
+                                                                 Age = Age) },
+               names = c("Cement", "Ash", "Coarse Aggregate", "Fine Aggregate", "Slag", "Superplasticizer"),
+               lower = c(min_limits_GA$Cement, min_limits_GA$Ash, 
+                         min_limits_GA$Coarse_Aggregate, min_limits_GA$Fine_Aggregate, 
+                         min_limits_GA$Slag, min_limits_GA$Superplasticizer), 
+               upper = c(max_limits_GA$Cement, max_limits_GA$Ash, 
+                         max_limits_GA$Coarse_Aggregate, max_limits_GA$Fine_Aggregate, 
+                         max_limits_GA$Slag, max_limits_GA$Superplasticizer),
+               popSize = 10, 
+               maxiter = 5, 
+               optim = FALSE, 
+               seed = 1, 
+               parallel = FALSE,
+               keepBest = FALSE,
+               updatePop = FALSE,
+               monitor = FALSE
+               )
+```
+The optimization algorithm found a concrete mixture with a compressive strength of `r round(GA_output@fitnessValue, 3)` MPa after `r GA_output@iter` iterations.
+
+# Solution
+
+```{r}
+tibble(
+    Strength = GA_output@fitnessValue,
+    Age = Age,
+    Cement = round(GA_output@solution[1, "Cement"]*100, 3),
+    Ash = round(GA_output@solution[1, "Ash"]*100, 3),
+    Coarse_Aggregate = round(GA_output@solution[1, "Coarse Aggregate"]*100, 3),
+    Fine_Aggregate = round(GA_output@solution[1, "Fine Aggregate"]*100, 3),
+    Slag = round(GA_output@solution[1, "Slag"]*100, 3),
+    Superplasticizer = round(GA_output@solution[1, "Superplasticizer"]*100, 3),
+    Water = round((1 - sum(GA_output@solution[1,]))*100, 3),
+    .name_repair = ~ c("Strength (MPa)",
+                       "Age (days)", 
+                       "Cement (%)", 
+                       "Ash (%)", 
+                       "Coarse Aggregate (%)", 
+                       "Fine Aggregate (%)", 
+                       "Slag (%)", 
+                       "Superplasticizer (%)", 
+                       "Water (%)"
+                       )
+) %>% t() %>% as.data.frame() %>% knitr::kable(format = "markdown", digits = 3, align = "c", col.names = "Values", label = "Result of optimization algorithm.")
+```
+
+```{r}
+GA::plot.ga(GA_output)
+```
+
+
+
+# Search Parameters
+
+```{r}
+tibble(
+    Component = paste(GA_output@names, "(%)"),
+    `Lower Limits` = GA_output@lower*100,
+    `Upper Limits` = GA_output@upper*100,
+    `Solution` = round(GA_output@solution[1, ]*100, 3)) %>% 
+  mutate(`Abides Limits` = if_else((`Solution` <= `Upper Limits`) & (`Solution` >= `Lower Limits`), TRUE, FALSE)) %>% 
+  kable(row.names = TRUE, format = "markdown", align = "lcccc", digits = 3, label = "Limits used for inputs of optimization algorithm.")
+```
+
+```{r}
+tibble(
+  `Population Size` = GA_output@popSize,
+  `Number of iterations` = GA_output@iter,
+  `Maximum number of iterations` = GA_output@maxiter,
+  `Probability of Crossover` = GA_output@pcrossover,
+  `Probability of Mutation` = GA_output@pmutation,
+  `Elitism (%)` = GA_output@elitism,
+  `Run` = GA_output@run, 
+  `Perform local optimization` = GA_output@optim) %>% 
+  t() %>% 
+  kable(col.names = "Setting", format = "markdown", digits = 2, align = "lc", label = "Settings of optimization algorithm.")
+```
 
 
 
 ```{r}
-x <- tibble(a = 23, 
-            b = 21, 
-            c = 32,
-            .name_repair = ~ c("a1", "a2", "a3")
-            )
-
-x_react <- reactive({x})
-
-x_iso <- isolate({ x })
-
-write.csv(x, file = "x.csv")
-# write.csv(x_react, file = "x_react.csv")
-write.csv(x_iso, file = "x_iso.csv")
+GA_output
 ```
+
+***
+
+# Additional Information
+
+```{r}
+Sys.info()
+```
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

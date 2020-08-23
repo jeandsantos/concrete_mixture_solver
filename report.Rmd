@@ -18,7 +18,8 @@ output:
       smooth_scroll: yes
 params:
   temp_df_dir: NA
-  search_output: NA
+  search_output_dir: NA
+  age: NA
 ---
 
 
@@ -39,6 +40,7 @@ library(plotly)
 print("hello world!")
 print(Sys.time())
 ```
+
 This report was automatically generated on the `r format(Sys.time(), '%d %B %Y')`
 
 
@@ -48,8 +50,12 @@ print(params$temp_df_dir)
 df <- read.csv(params$temp_df_dir)
 print(df)
 ```
+
 ```{r}
-print(search_output)
+print(params$search_output_dir)
+
+search_output <- readRDS(params$search_output_dir)
+search_output
 ```
 
 
